@@ -149,6 +149,55 @@ export const createDevice = async (req, res) => {
     }
   };
 
+  export const getDailyDeviceUsage = async (req, res) => {
+    try {
+      const date = new Date("2024-02-24"); // Date for which electricity usage is to be fetched
+      const devices = await Device.find(); // Fetch all devices
+  
+      // Array to store daily usage for each device
+      const deviceUsageData = [];
+  
+      // Iterate through each device
+      for (const device of devices) {
+        let totalUsage = 0;
+  
+        // Iterate through each hourly usage data of the device
+        for (const hourlyUsage of device.hourlyUsage) {
+          // Check if the timestamp falls within the specified date
+          if (
+            hourlyUsage.timestamp >= new Date(
+              date.getFullYear(),
+              date.getMonth(),
+              date.getDate(),
+              0, 0, 0
+            ) &&
+            hourlyUsage.timestamp < new Date(
+              date.getFullYear(),
+              date.getMonth(),
+              date.getDate() + 1,
+              0, 0, 0
+            )
+          ) {
+            totalUsage += hourlyUsage.powerUsed; // Sum up the power usage
+          }
+        }
+  
+        // Push the total usage for the device into the array
+        deviceUsageData.push({
+          deviceName: device.name,
+          totalUsage: totalUsage
+        });
+      }
+  
+      res.status(200).json(deviceUsageData); // Send the device-wise daily usage data
+    } catch (error) {
+      console.error('Error fetching daily electricity usage for devices:', error);
+      res.status(500).json({ message: "Error fetching daily electricity usage for devices", error });
+    }
+  };
+  
+ 
+
 
 
 

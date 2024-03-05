@@ -18,8 +18,11 @@ const Dahboard = () => {
   const [totalElectricity, setTotalElectricity] = useState(0);
   const [totalRooms, setTotalRooms] = useState(0);
   const [totalDevices, setTotalDevices] = useState(0);
-  const [usageData, setUsageData] = useState([]);
+  const [usageData, setUsageData] = useState([0]);
   const [roomUsage, setRoomUsage] = useState([]);
+  const [deviceUsage, setDeviceUsage] = useState([]);
+  const [usageToday, setUsageToday] = useState([0]);
+  const [usageCost, setUsageCost] = useState([0]);
   const [devices, setDevices] = useState([]);
   const [viewAll, setViewAll] = useState(false);
 
@@ -61,12 +64,24 @@ const Dahboard = () => {
       try {
         const response = await axios.get("http://localhost:5000/energy/usage"); 
         console.log("response:", response);
-        setUsageData(response.data);
+        setUsageData(response.data.hourlyUsage);
+        setUsageToday(response.data.totalElectricityUsage);
+        setUsageCost(response.data.totalElectricityCost);
       } catch (error) {
         console.error("Error fetching electricity usage data:", error);
       }
     };
     fetchUsageData();
+    const fetchDeviceUsageData = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/devices/daily-usage"); 
+        console.log("response:", response);
+        setDeviceUsage(response.data);
+      } catch (error) {
+        console.error("Error fetching electricity usage data:", error);
+      }
+    };
+    fetchDeviceUsageData();
 
     const fetchRoomUsage = async () => {
       try {
@@ -106,14 +121,24 @@ const Dahboard = () => {
             View All
           </Link>
         </div>
-        <div className="rounded-md bg-[#99F899]  w-48 py-4 px-3">
-          <p className="mb-4">Electricity used:</p>
+        <div className="rounded-md bg-[#99F899]  w-48 py-4 px-3 mr-8">
+          <p className="mb-4">Electricity this month:</p>
           <p className="text-3xl mb-4">{totalElectricity}</p>
           <p className="text-xl">kWh</p>
         </div>
+        <div className="rounded-md bg-[#99F899]  w-48 py-4 px-3 mr-8">
+          <p className="mb-4">Electricity today:</p>
+          <p className="text-3xl mb-4">{usageToday}</p>
+          <p className="text-xl">kWh</p>
+        </div>
+        <div className="rounded-md bg-[#99F899]  w-48 py-4 px-3">
+          <p className="mb-4">Cost today:</p>
+          <p className="text-3xl mb-4">{usageCost}</p>
+          <p className="text-xl">$</p>
+        </div>
       </div>
       <div className="mb-24">
-        <p className="text-xl font-bold mb-10">Energy Usage</p>
+        <p className="text-xl font-bold mb-10">Energy Consumption</p>
        
         <div className="h-[38rem] w-full border rounded-md px-4 py-16">
         <ResponsiveContainer width="100%" height="100%" >
@@ -149,6 +174,26 @@ const Dahboard = () => {
           >
             <YAxis />
              <XAxis dataKey="room"/>
+             <Tooltip />
+            
+            <Bar dataKey="totalUsage" fill="#91f891" />
+          </BarChart>
+        </ResponsiveContainer>
+        </div>
+      
+        <div></div>
+      </div>
+      <div className="mb-24">
+        <p className="text-xl font-bold mb-10">Devices</p>
+       
+        <div className="h-[38rem] w-full border rounded-md px-4 py-16">
+        <ResponsiveContainer width="100%" height="100%" >
+          <BarChart
+            data={deviceUsage}
+           
+          >
+            <YAxis />
+             <XAxis dataKey="deviceName"/>
              <Tooltip />
             
             <Bar dataKey="totalUsage" fill="#91f891" />
