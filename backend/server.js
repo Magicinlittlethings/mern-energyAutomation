@@ -16,7 +16,13 @@ connectDB();
 
 // Middleware
 app.use(json());
-app.use(cors());
+app.use(cors(
+    {
+        origin:["https://mern-energy-automation.vercel.app"],
+        methods:["POST", "GET"],
+        credentials:true
+    }
+));
 
 // Routes
 app.use('/rooms', roomsRouter);
